@@ -55,7 +55,7 @@ pub fn getTok(data: []const u8, pos: *usize) ?Token {
 
                 current = data[pos.*];
 
-                while (std.ascii.isAlphanumeric(current) or current == '_') : (pos.* += 1) {
+                while (current != ' ' and current != '=') : (pos.* += 1) {
                     current = data[pos.*];
                 }
 
@@ -69,6 +69,7 @@ pub fn getTok(data: []const u8, pos: *usize) ?Token {
     return null;
 }
 pub fn readToStruct(comptime T: type, data: []const u8) !T {
+    std.debug.print("Data:{s}\n", .{data});
     var namespace: []const u8 = "";
     var pos: usize = 0;
     var ret = std.mem.zeroes(T);
@@ -77,8 +78,10 @@ pub fn readToStruct(comptime T: type, data: []const u8) !T {
             .comment => {},
             .section => |ns| {
                 namespace = ns;
+                std.debug.print("Section:{s}\n", .{ns});
             },
             .key => |key| {
+                std.debug.print("Key:{s}\n", .{key});
                 var next_tok = getTok(data, &pos);
                 // if there's nothing just give a comment which is also a syntax error
                 switch (next_tok orelse .comment) {
